@@ -1,5 +1,16 @@
+## OwO What's this?
+Quick Paletter is an Aseprite extension that allows you to generate a palette by selecting a file or entering an URL. 
+
 ## IMPORTANT!!!
 When you first install the extension and used the "Palette from URL" function, allow the script full access on the security pop up. Otherwise, the app will crash. Also before you use that function, make sure to save everything, as there seems to be rare crashes? Idk, if someone else can help me debug and fix my code it would be great.
+
+## Pre-requisites
+- Python 3.9
+- And install the following dependencies using command line
+-- pip install asyncio
+-- pip install websockets
+-- pip install Pillow
+-- pip install requests
 
 ## User Guide
 - Three new options are added under Sprite on top left
