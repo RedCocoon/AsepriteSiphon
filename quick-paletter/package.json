@@ -2,7 +2,7 @@
   "name": "quick-paletter",
   "displayName": "Quick Paletter",
   "description": "Generates Palettes from URL or File",
-  "version": "0.1",
+  "version": "0.2",
   "author": { "name": "Red Cocoon",
               "email": "zzsmd0000@gmail.com",
               "url": "https://redcocoon.github.io/website" },

@@ -2,6 +2,7 @@ local ws
 
 local target_url
 local received_image
+local server_started = false
 
 function script_path()
    local str = debug.getinfo(2, "S").source:sub(2)
@@ -11,10 +12,11 @@ end
 local path = script_path()
 
 function init(plugin)
+  
   plugin:newCommand{
     id="ApiCheck",
     title="Check API Version",
-    group="sprite_properties",
+    group="file_scripts",
     onclick=function()
       print(app.version)
       print(app.apiVersion)
@@ -23,8 +25,8 @@ function init(plugin)
   }
   plugin:newCommand{
     id="FilePaletter",
-    title="New Palette from File...",
-    group="sprite_properties",
+    title="New Palette from File",
+    group="palette_generation",
     onclick=function()
       local data =
         Dialog():label{ id="label", label="Warning!", text="The current palette will be overriden!" }
@@ -41,8 +43,8 @@ function init(plugin)
   }
   plugin:newCommand{
     id="UrlPaletter",
-    title="New Palette from URL...",
-    group="sprite_properties",
+    title="New Palette from URL",
+    group="palette_generation",
     onclick=function()
       local data =
         Dialog():label{ id="label", label="Warning!", text="The current palette will be overriden!" }
@@ -54,10 +56,29 @@ function init(plugin)
       if not (data.confirm) then
         return nil
       end
-      os.execute("python "..path.."WebSocket.py")
+      if not server_started then
+        -- WINDOWS
+      	--os.execute("start /b python "..path.."WebSocket.py")
+        -- LINUX/MAC
+      	os.execute("python "..path.."WebSocket.py &")
+      	server_started = true
+      end
       get_image(data.url)
     end
   }
+--  plugin:newCommand{
+--    id="Shutdown",
+--    title="Shutdown WebSocket",
+--    group="sprite_properties",
+--    onclick=function()
+--      ws:sendText("shutdown")
+--    end
+--  }
+end
+
+function exit(plugin)
+  ws:sendText("shutdown")
+  ws:close()
 end
 
 function set_palette(palette)
@@ -81,7 +102,7 @@ end
 function get_image(get_url)
   ws = WebSocket{
       onreceive = ws_receive,
-      url = "https://localhost:8080",
+      url = "ws://localhost:8080",
       deflate = false
   }
   target_url = get_url
@@ -90,12 +111,14 @@ end
 
 function ws_receive(mt, data)
   if mt == WebSocketMessageType.OPEN then
+    if target_url == nil then
+      return
+    end
     ws:sendText(target_url)
+    target_url = nil
   elseif mt == WebSocketMessageType.BINARY then
     received_image = temp_file(data)
     generate_palette(received_image)
-    ws:sendText("shutdown")
-    ws:close()
 
     -- TODO: Uncomment this when Aseprite support io.tmpname()
     -- os.remove(received_image)

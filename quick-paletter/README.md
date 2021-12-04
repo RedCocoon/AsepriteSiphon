@@ -4,13 +4,18 @@ Quick Paletter is an Aseprite extension that allows you to generate a palette by
 ## IMPORTANT!!!
 When you first install the extension and used the "Palette from URL" function, allow the script full access on the security pop up. Otherwise, the app will crash. Also before you use that function, make sure to save everything, as there seems to be rare crashes? Idk, if someone else can help me debug and fix my code it would be great.
 
+
 ## Pre-requisites
 - Python 3.9
 - And install the following dependencies using command line
--- pip install asyncio
--- pip install websockets
--- pip install Pillow
--- pip install requests
+- pip install asyncio
+- pip install websockets
+- pip install Pillow
+- pip install requests
+
+## Install Guide
+- Download the lastest version of the scripts from https://github.com/RedCocoon/AsepriteSiphon/releases
+
 
 ## User Guide
 - Three new options are added under Sprite on top left
@@ -18,6 +23,7 @@ When you first install the extension and used the "Palette from URL" function, a
 - New Palette from File generate new palette from the selected file
 - New Palette from URL generate new palette from the image linked
 - Please do not put non-image url in there, I don't even know what will happen owo
+- Run WebSocketShutdowner.py incase for whatever reason the websocket is still open after closing Aseprite
 
 ## Known problems
 - "Websocket Error" Popup: as far as I can tell, it is completely fine.
