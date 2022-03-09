@@ -2,11 +2,13 @@ local ws
 
 local target_url
 local received_image
+local os_slash = app.fs.pathSeparator
 local server_started = false
 
 function script_path()
    local str = debug.getinfo(2, "S").source:sub(2)
-   return str:match("(.*/)")
+   str = str:gsub("\\","/")
+   return str:match("(.*/)") or "."
 end
 
 local path = script_path()
@@ -57,23 +59,27 @@ function init(plugin)
         return nil
       end
       if not server_started then
-        -- WINDOWS
-      	--os.execute("start /b python "..path.."WebSocket.py")
-        -- LINUX/MAC
-      	os.execute("python "..path.."WebSocket.py &")
+      	-- WINDOWS
+      	if os_slash == "\\" then
+      		 print("windows")
+		 os.execute("start /b /min "..path.."WebSocket.py")
+	-- LINUX/MAC
+	else
+		os.execute("python "..path.."WebSocket.py &")	
+	end
       	server_started = true
       end
       get_image(data.url)
     end
   }
---  plugin:newCommand{
---    id="Shutdown",
---    title="Shutdown WebSocket",
---    group="sprite_properties",
---    onclick=function()
---      ws:sendText("shutdown")
---    end
---  }
+  --plugin:newCommand{
+  --  id="Shutdown",
+  --  title="Shutdown WebSocket",
+  --  group="sprite_properties",
+  --  onclick=function()
+  --    os.execute("start /b "..path.."WebSocketShutdowner.py")
+  --  end
+  --}
 end
 
 function exit(plugin)
@@ -92,6 +98,7 @@ function new_sprite(filename)
 end
 
 function generate_palette(filename)
+  --filename = filename:gsub("/","\\")
   if app.activeSprite == nil then
       new_sprite(filename)
   else
@@ -118,7 +125,7 @@ function ws_receive(mt, data)
     target_url = nil
   elseif mt == WebSocketMessageType.BINARY then
     received_image = temp_file(data)
-    generate_palette(received_image)
+    generate_palette(path.."image.png")
 
     -- TODO: Uncomment this when Aseprite support io.tmpname()
     -- os.remove(received_image)
@@ -129,14 +136,13 @@ end
 function temp_file(data)
   -- TODO: Uncomment this when Aseprite support io.tmpname()
   -- local filename = io.tmpname()
-  local file,err = io.open(path.."image.png","w")
+  local filename = path.."image.png"
+  local file,err = io.open(filename,"wb")
   if file then
       file:write(data)
       file:close()
   else
       print("error:", err) -- not so hard?
   end
-  -- TODO: Uncomment this when Aseprite support io.tmpname()
-  -- return filename
-  return path.."image.png"
+  return filename
 end

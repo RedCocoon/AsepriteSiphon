@@ -19,14 +19,13 @@ async def server(websocket, path):
     ## else, proccess the url and spit out the image back to lua
     else:
     	## get the data
-        response = requests.get(str(data))
+        response = requests.get(str(data)).content
         ## create a buffer to store the image
         buffered = BytesIO()
         ## open the image in response
-        img = Image.open(BytesIO(response.content))
+        img = Image.open(BytesIO(response))
         ## save the image to the created buffer, using PNG to avoid quality lost
         img.save(buffered, format="PNG")
-        
         ## Get the buffer image's byte values
         img_str = buffered.getvalue()
         # Send response back to client to convert back to an image
