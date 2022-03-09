@@ -14,12 +14,15 @@ When you first install the extension and used the "Palette from URL" function, a
 - pip install requests
 
 ## Install Guide
-- Download the lastest version of the scripts from https://github.com/RedCocoon/AsepriteSiphon/releases
+- Download the lastest version of the scripts for your platform from https://github.com/RedCocoon/AsepriteSiphon/releases
+- For Mac/Windows, double click the downloaded file to install it.
+- For Linux, in Aseprite go Edit> Preferences...> Extensions and click "Add Extension", then select the downloaded file.
 
 
 ## User Guide
-- Three new options are added under Sprite on top left
+- A new option under File for "Check API Version"
 - Click the first option "Check API Version" and make sure the last output is false
+- Two new palette generation options under the palette drop-down menu
 - New Palette from File generate new palette from the selected file
 - New Palette from URL generate new palette from the image linked
 - Please do not put non-image url in there, I don't even know what will happen owo
