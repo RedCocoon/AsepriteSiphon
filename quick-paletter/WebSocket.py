@@ -5,6 +5,9 @@ from PIL import Image
 import requests
 from io import BytesIO
 import base64
+import os
+
+current_file_path = os.path.dirname(__file__).replace("\\","/") + "/"
 
 async def server(websocket, path):
     # Get received data from websocket
@@ -25,11 +28,9 @@ async def server(websocket, path):
         ## open the image in response
         img = Image.open(BytesIO(response))
         ## save the image to the created buffer, using PNG to avoid quality lost
-        img.save(buffered, format="PNG")
-        ## Get the buffer image's byte values
-        img_str = buffered.getvalue()
+        img.save(current_file_path+"image.png", format="PNG")
         # Send response back to client to convert back to an image
-        await websocket.send(img_str)
+        await websocket.send("image_received")
 
 # Create websocket server
 start_server = websockets.serve(server, "localhost", 8080)
