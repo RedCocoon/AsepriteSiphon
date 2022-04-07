@@ -1,5 +1,5 @@
 ## OwO What's this?
-Preset Templater is an Aseprite extension that allows you to generate a palette by selecting a file or entering an URL. 
+Preset Templater is an Aseprite extension that allows you to save and load template files.
 
 ## Install Guide
 - Download the lastest version of the scripts for your platform from https://github.com/RedCocoon/AsepriteSiphon/releases
