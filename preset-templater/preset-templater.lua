@@ -143,10 +143,7 @@ function save_template(name)
 end
 
 function load_template(name)
-  local original_sprite = Sprite{ fromFile=name }
-  Sprite(original_sprite)
-  original_sprite:close()
-
+  Sprite{ fromFile=name }
 end
 
 function simple_info_dlg(title, label_text)
