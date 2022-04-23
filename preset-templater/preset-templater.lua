@@ -3,6 +3,7 @@ local pluginLocal
 function script_path()
    local str = debug.getinfo(2, "S").source:sub(2)
    str = str:gsub("\\","/")
+
    return str:match("(.*/)") or "."
 end
 
@@ -19,19 +20,23 @@ function init(plugin)
     title="New Sprite From Template...",
     group="file_new",
     onclick=function()
+      reload_templates_list()
       if not does_any_template_exists() then
         return nil
       end
-      local data =
-      Dialog("Select a Template"):newrow()
-              :combobox{ id="name", label="Select a Template:", options= plugin.preferences.templates }
-              :button{ id="confirm", text="Confirm", focus=true }
-              :button{ id="cancel", text="Cancel" }
-              :show().data
+      local data = show_new_sprite_dlg(false)
       if not data.confirm then
         return nil
       end
-      load_template(path.."templates/"..data.name..".aseprite")
+      local sprite = load_template(path.."templates/"..data.name..".aseprite")
+      data.width = tonumber(data.width)
+      data.height = tonumber(data.height)
+      if data.width > 0 then
+        sprite.width = data.width
+      end
+      if data.height > 0 then
+          sprite.height = data.height
+      end
     end
   }
 
@@ -52,7 +57,9 @@ function init(plugin)
       local sprite = app.activeSprite
       if sprite then
         name = show_enter_name_dlg("Save Current Sprite As Template")
-        save_template(name)
+        if name then
+          save_template(name)
+        end
       else
         simple_info_dlg("Error!", "A sprite must be opened for this operation!")
       end
@@ -64,6 +71,7 @@ function init(plugin)
     title="Manage Templates",
     group="file_scripts",
     onclick=function()
+      reload_templates_list()
       local templates = pluginLocal.preferences.templates
       if not does_any_template_exists() then
         return nil
@@ -83,15 +91,10 @@ function init(plugin)
           simple_info_dlg("Uhh... This is awkward...", "As Aseprite currently does not support renaming files, this option currently do nothing.")
         elseif (data.delete) then
            if simple_info_dlg("Warning!", "Are you sure?") then
-             table.remove(pluginLocal.preferences.templates, index)
-             if (index > #pluginLocal.preferences.templates) then
-               index = #pluginLocal.preferences.templates
-             end
-             four_label_info_dlg("Uhh... This is awkward...",
+             three_label_info_dlg("Uhh... This is awkward...",
              "As Aseprite currently does not support removing files,",
-             "You need to manually remove the file:",
-             path.."templates/"..data.name..".aseprite",
-             "The file will no longer show up on the list even if you don't delete, though." )
+             "You need to manually remove the file at:",
+             path.."templates/"..data.name..".aseprite")
            end
         else
           break
@@ -139,14 +142,37 @@ function save_template(name)
     return nil
   end
   sprite:saveCopyAs(path.."/templates/"..name..".aseprite")
-  table.insert(pluginLocal.preferences.templates, name)
+  tab_insert(pluginLocal.preferences.templates, name)
 end
 
 function load_template(name)
-  local original_sprite = Sprite{ fromFile=name }
-  Sprite(original_sprite)
-  original_sprite:close()
+  local old_sprite = app.open(name)
+  local new_sprite = Sprite(old_sprite)
+  old_sprite:close()
+  new_sprite.filename = app.fs.fileTitle(name..".aseprite")
+  return new_sprite
+end
 
+-- Add file to the list if not previously there,
+-- Remove file from the list if its not there.
+function reload_templates_list()
+  -- pluginLocal.preferences.templates = {}
+  local files_list = app.fs.listFiles(path.."templates")
+  for i, f in ipairs(files_list) do
+    local title = app.fs.fileTitle(f)
+    files_list[i] = title
+    if not has_value(pluginLocal.preferences.templates, title) then
+      tab_insert(pluginLocal.preferences.templates, title)
+    end
+  end
+
+  local fake_table = {}
+  for i, f in ipairs(pluginLocal.preferences.templates) do
+    if has_value(files_list, f) then
+      tab_insert(fake_table, f)
+    end
+  end
+  pluginLocal.preferences.templates = fake_table
 end
 
 function simple_info_dlg(title, label_text)
@@ -156,6 +182,17 @@ function simple_info_dlg(title, label_text)
           :button{ id="confirm", text="Confirm" }
           :show().data
   return data.confirm
+end
+
+function three_label_info_dlg(title, label1, label2, label3, label4)
+  local remove_file_data = Dialog(title):label{ id="label", label=label1}
+      :newrow()
+      :label{ id="label2", label=label2}
+      :newrow()
+      :label{ id="label3", label=label3}
+      :newrow()
+      :button{ id="confirm", text="Confirm" }
+      :show().data
 end
 
 function four_label_info_dlg(title, label1, label2, label3, label4)
@@ -168,6 +205,30 @@ function four_label_info_dlg(title, label1, label2, label3, label4)
       :label{ id="label3", label=label4}
       :button{ id="confirm", text="Confirm" }
       :show().data
+end
+
+function show_new_sprite_dlg(expanded)
+  local dlg = Dialog("Select a Template")
+  dlg:newrow()
+  :combobox{ id="name", label="Select a Template:", options= pluginLocal.preferences.templates }
+  :newrow()
+  :check{ id="overwrites", selected=expanded, text="Enable Overwrites",
+  onclick= function()
+      expanded = not expanded
+      for i, val in ipairs({"width","height"}) do
+        dlg:modify{id=val, visible=expanded}
+      end
+    end
+  }
+  :newrow()
+  :number{ id="width", label="Width:",  decimal=nil, visible=expanded}
+  :newrow()
+  :number{ id="height", label="Height:", decimal=nil, visible=expanded}
+  :newrow()
+  :button{ id="confirm", text="Confirm", focus=true }
+  :button{ id="cancel", text="Cancel" }
+  :show()
+  return dlg.data
 end
 
 function show_enter_name_dlg(title)
@@ -195,9 +256,17 @@ function show_manage_dlg(index)
           :button{ id="up", text="Move Up" }
           :button{ id="down", text="Move Down" }
           :newrow()
+          :button{ id="rename", text="Rename" }
           :button{ id="delete", text="Delete" }
           :show()
+end
 
+function tab_insert(tab, val)
+  table.insert(tab, val)
+end
+
+function tab_remove(tab, index)
+  table.remove(tab, index)
 end
 
 function has_value(tab, val)
