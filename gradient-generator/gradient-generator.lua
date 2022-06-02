@@ -9,16 +9,21 @@ function init(plugin)
     group="palette_generation",
     onclick=function()
       local dlg = Dialog()
-      dlg:color{ id="color", label="Enter color:"}
+      dlg:color{ id="color", label="Enter color:", color=app.fgColor}
       dlg:newrow()
-      dlg:number{ id="steps", label="Steps:", text="9", decimals=0}
+      dlg:slider{ id="steps", label="Steps:", min=3, max=256, value=9}
       dlg:slider{ id="angle", label="Angle:", min=0, max=360, value=90}
+      dlg:newrow()
+      dlg:check{ id="replace", label="Replace current palette?", selected=false }
       dlg:newrow()
       dlg:button{ id="confirm", text="Confirm" }
       dlg:button{ id="cancel", text="Cancel" }
       dlg:show()
       local data = dlg.data
-      local steps = data.steps + 1
+      if not data.confirm then
+        return
+      end
+      local steps = data.steps
       local angle = data.angle
       local color = Color(data.color)
       local lightness = color.lightness
@@ -42,9 +47,21 @@ function init(plugin)
       end
 
       local palette = Palette()
-      palette:resize(#colors)
-      for x = 1, #colors-1, 1 do
-        palette:setColor(x, colors[x])
+      if data.replace then
+        palette:resize(#colors)
+        for x = 0, #colors-1, 1 do
+          palette:setColor(x, colors[x+1])
+        end
+      else
+        local sprite = app.activeSprite
+        local original_size = #sprite.palettes[1]
+        palette:resize(original_size+#colors)
+        for x = 0, original_size-1, 1 do
+          palette:setColor(x, sprite.palettes[1]:getColor(x))
+        end
+        for x = 0, #colors-1, 1 do
+          palette:setColor(original_size+x, colors[x+1])
+        end
       end
       set_palette(palette)
     end

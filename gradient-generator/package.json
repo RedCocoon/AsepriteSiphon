@@ -2,7 +2,7 @@
   "name": "gradientGenerator",
   "displayName": "Gradient Generator",
   "description": "Create a gradient from a single color.",
-  "version": "0.1",
+  "version": "0.2",
   "author": { "name": "Red Cocoon/Ewanhowell",
               "email": "zzsmd0000@gmail.com",
               "url": "https://redcocoon.github.io/website" },
