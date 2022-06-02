@@ -13,11 +13,6 @@ When you first install the extension and used the "Palette from URL" function, a
 - pip install Pillow
 - pip install requests
 
-## Install Guide
-- Download the lastest version of the scripts for your platform from https://github.com/RedCocoon/AsepriteSiphon/releases
-- For Mac/Windows, double click the downloaded file to install it.
-- For Linux, in Aseprite go Edit> Preferences...> Extensions and click "Add Extension", then select the downloaded file.
-
 
 ## User Guide
 - A new option under File for "Check API Version"
