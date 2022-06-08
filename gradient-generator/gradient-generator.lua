@@ -12,7 +12,7 @@ function init(plugin)
       dlg:color{ id="color", label="Enter color:", color=app.fgColor}
       dlg:newrow()
       dlg:slider{ id="steps", label="Steps:", min=3, max=256, value=9}
-      dlg:slider{ id="angle", label="Angle:", min=0, max=360, value=90}
+      dlg:slider{ id="angle", label="Angle:", min=-360, max=360, value=90}
       dlg:newrow()
       dlg:check{ id="replace", label="Replace current palette?", selected=false }
       dlg:newrow()
